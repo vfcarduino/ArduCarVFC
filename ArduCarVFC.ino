@@ -1,127 +1,221 @@
-#include <AFMotor.h>
+/*
+#define light_FR  14    //LED Front Right   pin A0 for Arduino Uno
+#define light_FL  15    //LED Front Left    pin A1 for Arduino Uno
+#define horn_Buzz 18    //Horn Buzzer       pin A4 for Arduino Uno
+*/
 
-AF_DCMotor motor4(4);
-AF_DCMotor motor3(3);
-AF_DCMotor motor2(2);
-AF_DCMotor motor1(1);
+#define EN_A 13         // ativa motor direita
+#define EN_B 12         // ativa motor esquerda
 
-void setup() 
-{
-  //Set initial speed of the motor & stop
-  motor4.setSpeed(200);
-  motor4.run(RELEASE);
+// motor A
+#define IN_1  11
+#define IN_2  10
 
-  motor3.setSpeed(200);
-  motor3.run(RELEASE);
+// motor B
+#define IN_3  8
+#define IN_4  9
 
-  motor2.setSpeed(200);
-  motor2.run(RELEASE);
+//int comando;            //Int to store app command state.
+String comando;
+//char comando;
+int speedCar = 100;     // 50 - 255.
+int speed_Coeff = 4;
+boolean lightFront = false;
+boolean horn = false;
 
-  motor1.setSpeed(200);
-  motor1.run(RELEASE);
+void setup() {  
+/*
+    pinMode(light_FR, OUTPUT);
+    pinMode(light_FL, OUTPUT);
+    pinMode(horn_Buzz, OUTPUT);
+*/
+    
+    pinMode(EN_A, OUTPUT);
+    pinMode(EN_B, OUTPUT);
+  
+    pinMode(IN_1, OUTPUT);
+    pinMode(IN_2, OUTPUT);
+    pinMode(IN_3, OUTPUT);
+    pinMode(IN_4, OUTPUT);
+
+    Serial.begin(115200); 
+} 
+
+void goAhead(){ 
+      digitalWrite(IN_1, HIGH);
+      digitalWrite(IN_2, LOW);
+      analogWrite(EN_A, speedCar);
+
+      digitalWrite(IN_4, HIGH); //LOW
+      digitalWrite(IN_3, LOW);  //HIGH
+      analogWrite(EN_B, speedCar);
 }
 
-void loop() 
-{
-  uint8_t i;
+void goBack(){ 
+      digitalWrite(IN_1, LOW);
+      digitalWrite(IN_2, HIGH);
+      analogWrite(EN_A, speedCar);
 
-  // Turn on motor
-  motor4.run(FORWARD);
-  motor3.run(FORWARD);
-  motor2.run(FORWARD);
-  motor1.run(FORWARD);
+      digitalWrite(IN_4, LOW);  //HIGH
+      digitalWrite(IN_3, HIGH); //LOW
+      analogWrite(EN_B, speedCar);
+}
+
+void goRight(){ 
+      digitalWrite(IN_1, LOW);
+      digitalWrite(IN_2, HIGH);
+      analogWrite(EN_A, speedCar);
+
+      digitalWrite(IN_4, HIGH); //LOW
+      digitalWrite(IN_3, LOW);  //HIGH
+      analogWrite(EN_B, speedCar);
+}
+
+void goLeft(){
+      digitalWrite(IN_1, HIGH);
+      digitalWrite(IN_2, LOW);
+      analogWrite(EN_A, speedCar);
+
+
+      digitalWrite(IN_4, LOW);  //HIGH
+      digitalWrite(IN_3, HIGH); //LOW
+      analogWrite(EN_B, speedCar);
+}
+
+void goAheadRight(){
+      digitalWrite(IN_1, HIGH);
+      digitalWrite(IN_2, LOW);
+      analogWrite(EN_A, speedCar/speed_Coeff);
+
+      digitalWrite(IN_4, HIGH); //LOW
+      digitalWrite(IN_3, LOW);  //HIGH
+      analogWrite(EN_B, speedCar);
+}
+
+void goAheadLeft(){
+      digitalWrite(IN_1, HIGH);
+      digitalWrite(IN_2, LOW);
+      analogWrite(EN_A, speedCar);
+
+      digitalWrite(IN_4, HIGH); //LOW
+      digitalWrite(IN_3, LOW);  //HIGH
+      analogWrite(EN_B, speedCar/speed_Coeff);
+ 
+}
+
+void goBackRight(){ 
+      digitalWrite(IN_1, LOW);
+      digitalWrite(IN_2, HIGH);
+      analogWrite(EN_A, speedCar/speed_Coeff);
+
+
+      digitalWrite(IN_4, LOW);  //HIGH
+      digitalWrite(IN_3, HIGH); //LOW
+      analogWrite(EN_B, speedCar);
+}
+
+void goBackLeft(){ 
+      digitalWrite(IN_1, LOW);
+      digitalWrite(IN_2, HIGH);
+      analogWrite(EN_A, speedCar);
+
+      digitalWrite(IN_4, LOW);  //HIGH
+      digitalWrite(IN_3, HIGH); //LOW
+      analogWrite(EN_B, speedCar/speed_Coeff);
+}
+
+void stopRobot(){  
+      digitalWrite(IN_1, LOW);
+      digitalWrite(IN_2, LOW);
+      analogWrite(EN_A, speedCar);
+
+      digitalWrite(IN_4, LOW);
+      digitalWrite(IN_3, LOW);
+      analogWrite(EN_B, speedCar);
+}
+
+void trataCmd(char cmd) {
+/*
+    if (lightFront) {digitalWrite(light_FR, HIGH); digitalWrite(light_FL, HIGH);}
+    if (!lightFront) {digitalWrite(light_FR, LOW); digitalWrite(light_FL, LOW);}
+    if (horn) {digitalWrite(horn_Buzz, HIGH);}
+    if (!horn) {digitalWrite(horn_Buzz, LOW);}
+*/
+        
+    switch (cmd) {
+        case 'F':goAhead();break;
+        case 'B':goBack();break;
+        case 'L':goLeft();break;
+        case 'R':goRight();break;
+        case 'I':goAheadRight();break;
+        case 'G':goAheadLeft();break;
+        case 'J':goBackRight();break;
+        case 'H':goBackLeft();break;
+        case '0':speedCar = 100;break;
+        case '1':speedCar = 120;break;
+        case '2':speedCar = 135;break;
+        case '3':speedCar = 155;break;
+        case '4':speedCar = 170;break;
+        case '5':speedCar = 185;break;
+        case '6':speedCar = 195;break;
+        case '7':speedCar = 215;break;
+        case '8':speedCar = 235;break;
+        case '9':speedCar = 255;break;
+        case 'S':stopRobot();break;
+        case 'W':lightFront = true;break;
+        case 'w':lightFront = false;break;
+        case 'V':horn = true;break;
+        case 'v':horn = false;break;
+    }
+}
+
+void loop(){
+    //if (speedCar == 255) {
+    //  speedCar = 100;
+    //} else {
+    //  speedCar = 255;
+    //}
+    speedCar = 255;
   
-  // Accelerate from zero to maximum speed
-  for (i=0; i<255; i++) 
-  {
-    motor4.setSpeed(i);  
-    motor3.setSpeed(i);  
-    motor2.setSpeed(i);  
-    motor1.setSpeed(i);  
-    delay(10);
-  }
+    goAhead();
+    delay(5000);
+    
+    goBack();
+    delay(5000);
 
-  delay(3000);
-  
-  // Decelerate from maximum speed to zero
-  for (i=255; i!=0; i--) 
-  {
-    motor4.setSpeed(i);  
-    motor3.setSpeed(i);  
-    motor2.setSpeed(i);  
-    motor1.setSpeed(i);  
-    delay(10);
-  }
+    //goAheadRight();
+    //delay(1000);
+    
+    //goAheadLeft();
+    //delay(1000);
 
-  // Now change motor direction
-  motor4.run(BACKWARD);
-  motor3.run(BACKWARD);
-  motor2.run(BACKWARD);
-  motor1.run(BACKWARD);
-  
-  // Accelerate from zero to maximum speed
-  for (i=0; i<255; i++) 
-  {
-    motor4.setSpeed(i);  
-    motor3.setSpeed(i);  
-    motor2.setSpeed(i);  
-    motor1.setSpeed(i);  
-    delay(10);
-  }
+    goRight();
+    delay(1000);
 
-  delay(3000);
+    goLeft();
+    delay(1000);
 
-  // Decelerate from maximum speed to zero
-  for (i=255; i!=0; i--) 
-  {
-    motor4.setSpeed(i);  
-    motor3.setSpeed(i);  
-    motor2.setSpeed(i);  
-    motor1.setSpeed(i);  
-    delay(10);
-  }
+    goBackRight();
+    delay(1000);
 
-  // Now turn off motor
-  motor4.run(RELEASE);
-  motor3.run(RELEASE);
-  motor2.run(RELEASE);
-  motor1.run(RELEASE);
-  delay(500);
+    goBackLeft();
+    delay(1000);
+
+    stopRobot();
+    delay(1000);
 
 
-  // Turn on motor
-  motor4.run(FORWARD);
-  motor3.run(FORWARD);
-  motor2.run(BACKWARD);
-  motor1.run(BACKWARD);
 
-  // Accelerate from zero to maximum speed
-  for (i=0; i<255; i++) 
-  {
-    motor4.setSpeed(i);  
-    motor3.setSpeed(i);  
-    motor2.setSpeed(i);  
-    motor1.setSpeed(i);  
-    delay(10);
-  }
+    //if (Serial.available() > 0) {
+        //comando = Serial.read();
+        //comando = Serial.readString();
 
-  delay(500);
+        //Serial.println( comando );
 
-  // Turn on motor
-  motor4.run(BACKWARD);
-  motor3.run(BACKWARD);
-  motor2.run(FORWARD);
-  motor1.run(FORWARD);
-
-  // Accelerate from zero to maximum speed
-  for (i=0; i<255; i++) 
-  {
-    motor4.setSpeed(i);  
-    motor3.setSpeed(i);  
-    motor2.setSpeed(i);  
-    motor1.setSpeed(i);  
-    delay(10);
-  }
-
-  delay(500);
+        //char copy[1];
+        //comando.toCharArray(copy, 1);
+        
+        //Serial.println( copy );
+        //trataCmd(copy);
+    //}
 }
