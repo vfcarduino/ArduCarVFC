@@ -1,8 +1,11 @@
+#include "Config.h";
 #include "Motores.h";
 #include "SensorRadar.h";
 
 void setup() {
-    Serial.begin(115200); 
+    #if _DEBUG
+    Serial.begin(115200);
+    #endif
     motores_Setup();
     radar_Setup();
 
@@ -11,10 +14,13 @@ void setup() {
 }
 
 void loop(){
+// /*
     // check distância frontal
     radarCheckDistFrente();
     if (frontDistanceCm < maxFrontDistance) {
+        #if _DEBUG
         Serial.println("muito perto");
+        #endif
         radarCheckDistEsquerda();
         delay(20);
         radarCheckDistDireita();
@@ -25,14 +31,18 @@ void loop(){
             roboParaEsquerda();
         }
     } else {
+        #if _DEBUG
         Serial.println("OK");
+        #endif
         roboParaFrente();
     }
-  
+
     // check distância esquerda
     radarCheckDistEsquerda();
     if (leftDistanceCm < maxLeftDistance) {
+        #if _DEBUG
         Serial.println("esquerda muito perto");
+        #endif
         delay(20);
         radarCheckDistEsquerda();
         delay(20);
@@ -48,7 +58,9 @@ void loop(){
     // check distância direita
     radarCheckDistDireita();
     if (rightDistanceCm < maxRightDistance) {
+        #if _DEBUG
         Serial.println("direita muito perto");
+        #endif
         delay(20);
         radarCheckDistDireita();
         delay(20);
@@ -60,7 +72,7 @@ void loop(){
             roboParaEsquerda();
         }
     }
-
+// */
 
 /*
     radarCheckDistFrente();
@@ -73,5 +85,5 @@ void loop(){
     } else {
         roboParaFrente();
     }
-*/
+// */
 }
